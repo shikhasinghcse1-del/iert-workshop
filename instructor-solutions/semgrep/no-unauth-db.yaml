@@ -1,0 +1,34 @@
+rules:
+  - id: no-unauth-db-access
+    languages:
+      - typescript
+      - javascript
+    severity: ERROR
+    message: >-
+      Direct database query detected in an API route handler without prior session authentication verification.
+      Always call `requireUser()` or check session validity before executing database operations.
+    patterns:
+      - pattern-either:
+          - pattern: |
+              export async function $FUNC(req: Request, ...) {
+                ...
+                db.$METHOD(...);
+                ...
+              }
+      - pattern-not: |
+          export async function $FUNC(req: Request, ...) {
+            ...
+            const $USER = db.getUserBySession(...);
+            if (!$USER) { ... }
+            ...
+          }
+      - pattern-not: |
+          export async function $FUNC(req: Request, ...) {
+            ...
+            await requireUser(...);
+            ...
+          }
+    metadata:
+      category: security
+      cwe: "CWE-306: Missing Authentication for Critical Function"
+      owasp: "A01:2021 - Broken Access Control"

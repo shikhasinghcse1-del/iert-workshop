@@ -1,0 +1,45 @@
+name: Hardened Production CI Workflow
+
+# SAFE TRIGGER: pull_request runs in untrusted context without access to secrets or write tokens
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# LEAST PRIVILEGE: Explicitly read-only permissions across all scopes
+permissions:
+  contents: read
+
+jobs:
+  secure-build-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      # SECURE: Action pinned to exact 40-character immutable commit SHA
+      # actions/checkout@v4.2.2
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      # SECURE: Action pinned to exact commit SHA
+      # actions/setup-node@v4.2.0
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Verify Clean Package Integrity
+        run: |
+          npm ci --ignore-scripts
+          npm audit --audit-level=high
+
+      # SBOM Generation Step using CycloneDX
+      - name: Generate CycloneDX Software Bill of Materials (SBOM)
+        run: |
+          npx @cyclonedx/cyclonedx-npm --output-file bom.json
+        continue-on-error: true
+
+      - name: Run Build
+        run: npm run build
