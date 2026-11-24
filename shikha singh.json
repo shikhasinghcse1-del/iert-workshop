@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Chrome against localhost:3000",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/iert-workshop2026-main/iert-workshop2026-main"
+        },
+        {
+            "name": "Next.js: dev (Start Server)",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/iert-workshop2026-main/iert-workshop2026-main"
+        }
+    ]
+}
